@@ -6,8 +6,8 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import com.biggates.devicemanager.PlatformContext
 import com.biggates.devicemanager.SoundVolume
 import kotlinx.coroutines.*

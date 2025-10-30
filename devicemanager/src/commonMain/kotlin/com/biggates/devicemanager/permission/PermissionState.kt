@@ -1,4 +1,4 @@
-package com.biggates.devicemanager
+package com.biggates.devicemanager.permission
 
 interface PermissionController
 
@@ -7,3 +7,4 @@ sealed class PermissionState {
     data class Denied(val canAskAgain: Boolean) : PermissionState()
     data object NotDetermined : PermissionState()
 }
+

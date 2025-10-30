@@ -7,6 +7,8 @@ import com.biggates.devicemanager.monitor.NetworkMonitor
 import com.biggates.devicemanager.monitor.PowerStateMonitor
 import com.biggates.devicemanager.monitor.SoundModeMonitor
 import com.biggates.devicemanager.monitor.VolumeMonitor
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

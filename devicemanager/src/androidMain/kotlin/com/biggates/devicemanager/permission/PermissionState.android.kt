@@ -1,4 +1,4 @@
-package com.biggates.devicemanager
+package com.biggates.devicemanager.permission
 
 import android.app.Application
 import android.content.Intent
@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import com.biggates.devicemanager.PlatformContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -69,11 +70,10 @@ fun createDefaultAndroidPermissionController(
  * - 거부되었고 '설명 필요' 상태면, 자동으로 한 번 더 재요청
  * - 여전히 거부이면서 '다시는 묻지 않기(영구 거부)'면, 설정 화면 열고 복귀 후 재확인
  */
-suspend fun requestWithAutoRetryAndSettings(
-    controller: AndroidPermissionController,
+suspend fun AndroidPermissionController.requestWithAutoRetryAndSettings(
     permissions: Array<String>
 ): Boolean {
-    var result = controller.launchPermissions(permissions)
+    var result = launchPermissions(permissions)
 
     fun isGrantedAll() = permissions.all { p -> result[p] == true }
     if (isGrantedAll()) return true
@@ -84,9 +84,9 @@ suspend fun requestWithAutoRetryAndSettings(
     if (denied.isEmpty()) return true
 
     // 설명 필요(라쇼날)인 항목이 하나라도 있으면, "한 번 더" 자동 재요청
-    val needsRationale = denied.any { p -> controller.shouldShowRationale(p) }
+    val needsRationale = denied.any { p -> shouldShowRationale(p) }
     if (needsRationale) {
-        result = controller.recheckPermissions(permissions)
+        result = recheckPermissions(permissions)
         if (isGrantedAll()) return true
         denied = stillDenied()
         if (denied.isEmpty()) return true
@@ -94,7 +94,7 @@ suspend fun requestWithAutoRetryAndSettings(
 
     // 여기까지 왔는데도 거부라면 대개 '다시는 묻지 않기' 상태
     // 설정으로 보내고, 돌아오면 다시 한 번 확인
-    controller.openAppSettings()
-    result = controller.recheckPermissions(permissions)
+    openAppSettings()
+    result = recheckPermissions(permissions)
     return isGrantedAll()
 }

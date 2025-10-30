@@ -6,9 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
-import com.biggates.devicemanager.AndroidPermissionController
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.AndroidPermissionController
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import com.biggates.devicemanager.PlatformContext
 import com.biggates.devicemanager.SoundMode
 import com.biggates.devicemanager.SoundModeState

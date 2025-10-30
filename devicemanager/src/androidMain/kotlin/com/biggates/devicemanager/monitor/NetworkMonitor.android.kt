@@ -5,8 +5,8 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import com.biggates.devicemanager.NetworkType
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import com.biggates.devicemanager.PlatformContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

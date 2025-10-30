@@ -1,8 +1,8 @@
 package com.biggates.devicemanager.monitor
 
 import com.biggates.devicemanager.BatteryStatus
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

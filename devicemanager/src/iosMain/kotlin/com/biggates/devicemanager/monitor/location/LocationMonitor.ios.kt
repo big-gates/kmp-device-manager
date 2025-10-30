@@ -1,8 +1,9 @@
 package com.biggates.devicemanager.monitor.location
 
 import com.biggates.devicemanager.Location
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
+import com.biggates.devicemanager.permission.location.requestLocationPermission
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.CoroutineScope
@@ -89,13 +90,7 @@ class IosLocationMonitor : LocationMonitor {
     }
 
     override suspend fun requestPermission(controller: PermissionController): PermissionState {
-        val manager = cLLocationManager ?: CLLocationManager().also { cLLocationManager = it }
-        val status = CLLocationManager.authorizationStatus()
-        if (status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse) {
-            return PermissionState.Granted
-        }
-        manager.requestWhenInUseAuthorization() // Always가 필요하면 별도 분기에서 requestAlwaysAuthorization()
-        return PermissionState.NotDetermined
+        return controller.requestLocationPermission()
     }
 
     private fun startInternal() {

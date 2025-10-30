@@ -6,8 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.biggates.devicemanager.LocaleTimeState
-import com.biggates.devicemanager.PermissionController
-import com.biggates.devicemanager.PermissionState
+import com.biggates.devicemanager.permission.PermissionController
+import com.biggates.devicemanager.permission.PermissionState
 import com.biggates.devicemanager.PlatformContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
