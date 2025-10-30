@@ -30,22 +30,12 @@ class AndroidBatteryMonitor(
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(c: Context?, intent: Intent?) {
             intent ?: return
-            val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-            val isCharging = (status == BatteryManager.BATTERY_STATUS_CHARGING
-                    || status == BatteryManager.BATTERY_STATUS_FULL)
-
-            val manager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-            val percent = manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-                .takeIf { it in 0..100 }
-
-            _state.update { BatteryStatus(percent = percent, isCharging = isCharging) }
+            _state.update { parseFromIntent(intent) ?: it }
         }
     }
 
     override suspend fun start() {
-        // sticky 브로드캐스트를 즉시 한 번 수신
-        val sticky = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        batteryReceiver.onReceive(context, sticky)
+        _state.update { readSnapshot() }
 
         // 이후 변화 구독
         context.registerReceiver(batteryReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
@@ -59,5 +49,53 @@ class AndroidBatteryMonitor(
     override suspend fun requestPermission(controller: PermissionController): PermissionState {
         // 배터리 정보는 별도 런타임 권한이 필요하지 않음
         return PermissionState.Granted
+    }
+
+    /** 우선 BatteryManager, 실패 시 ACTION_BATTERY_CHANGED 폴백 */
+    private fun readSnapshot(): BatteryStatus? {
+        val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val pct = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        val percentFromBm = pct.takeIf { it in 0..100 }
+
+        val sticky = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+
+        val isCharging = sticky?.let {
+            val status = it.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+            status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                    status == BatteryManager.BATTERY_STATUS_FULL
+        }
+
+        val percentFromIntent = sticky?.let { intent ->
+            val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+            if (level >= 0 && scale > 0) ((level * 100f) / scale).toInt().coerceIn(0, 100) else null
+        }
+
+        val finalPercent = percentFromBm ?: percentFromIntent
+        val finalCharging = isCharging
+
+        return if (finalPercent != null || finalCharging != null) {
+            BatteryStatus(percent = finalPercent, isCharging = finalCharging)
+        } else {
+            null
+        }
+    }
+
+    private fun parseFromIntent(intent: Intent): BatteryStatus? {
+        val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+        val isCharging = when (status) {
+            BatteryManager.BATTERY_STATUS_CHARGING,
+            BatteryManager.BATTERY_STATUS_FULL -> true
+            BatteryManager.BATTERY_STATUS_DISCHARGING,
+            BatteryManager.BATTERY_STATUS_NOT_CHARGING -> false
+            else -> null
+        }
+
+        // 인텐트 기반 퍼센트 (일부 기기에서 더 신뢰됨)
+        val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+        val percent = if (level >= 0 && scale > 0) ((level * 100f) / scale).toInt().coerceIn(0, 100) else null
+
+        return BatteryStatus(percent = percent, isCharging = isCharging)
     }
 }
