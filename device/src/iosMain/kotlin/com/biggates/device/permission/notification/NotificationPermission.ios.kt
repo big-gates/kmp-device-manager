@@ -2,6 +2,7 @@ package com.biggates.device.permission.notification
 
 import com.biggates.device.PlatformContext
 import com.biggates.device.permission.IosPermissionController
+import com.biggates.device.permission.PermissionState
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
@@ -12,15 +13,16 @@ import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.coroutines.resume
 
-suspend fun IosPermissionController.requestNotifications(): Boolean {
-    if (context.checkNotificationsGranted()) return true
+suspend fun IosPermissionController.requestNotifications(): PermissionState {
+    if (context.checkNotificationsGranted()) return PermissionState.Granted
+
     val center = UNUserNotificationCenter.currentNotificationCenter()
-    val ok = suspendCancellableCoroutine { cont ->
+    val granted = suspendCancellableCoroutine { cont ->
         center.requestAuthorizationWithOptions(
             options = UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
-        ) { granted, _ -> cont.resume(granted) {} }
+        ) { granted, _ -> cont.resume(granted) }
     }
-    return ok
+    return if(granted) PermissionState.Granted else PermissionState.Denied(false)
 }
 
 actual suspend fun PlatformContext.checkNotificationsGranted(): Boolean {
@@ -30,7 +32,11 @@ actual suspend fun PlatformContext.checkNotificationsGranted(): Boolean {
     }
     return when (settings?.authorizationStatus) {
         UNAuthorizationStatusAuthorized,
+
+        // 조용한 알림 허용
         UNAuthorizationStatusProvisional,
+
+        // 일시적 허용(웹앱 등)
         UNAuthorizationStatusEphemeral -> true
 
         else -> false

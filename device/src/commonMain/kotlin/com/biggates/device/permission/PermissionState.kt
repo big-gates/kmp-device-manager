@@ -55,7 +55,7 @@ suspend fun PermissionController.requestWithAutoRetryAndSettings(
     // 설명 필요(라쇼날)인 항목이 하나라도 있으면, "한 번 더" 자동 재요청
     val needsRationale = denied.any { p -> shouldShowRationale(p) }
     if (needsRationale) {
-        result = recheckPermissions(permissions)
+        result = launchPermissions(permissions)
         if (isGrantedAll()) return true
         denied = stillDenied()
         if (denied.isEmpty()) return true

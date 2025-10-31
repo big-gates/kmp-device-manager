@@ -30,9 +30,15 @@ class IosPermissionController(
         val out = mutableMapOf<AppPermission, Boolean>()
         for (permission in permissions) {
             val granted = when (permission) {
-                AppPermission.LocationWhenInUse -> requestLocationWhenInUse()
-                AppPermission.LocationAlways -> requestLocationAlways()
-                AppPermission.Notifications -> requestNotifications()
+                AppPermission.LocationWhenInUse -> {
+                    requestLocationWhenInUse() == PermissionState.Granted
+                }
+                AppPermission.LocationAlways -> {
+                    requestLocationAlways() == PermissionState.Granted
+                }
+                AppPermission.Notifications -> {
+                    requestNotifications() == PermissionState.Granted
+                }
             }
             out[permission] = granted
         }
