@@ -12,7 +12,7 @@ kotlin {
     jvmToolchain(17)
 
     androidLibrary {
-        namespace = "com.biggates.device"
+        namespace = "com.biggates.devicemanager.device"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -64,11 +64,14 @@ kotlin {
 mavenPublishing {
     publishToMavenCentral()
 
-//    signAllPublications()
+    val isLocalPublish = gradle.startParameter.taskNames.any { it.contains("publishToMavenLocal") }
+    if (!isLocalPublish) {
+        signAllPublications()
+    }
 
     coordinates(
         groupId = "com.biggates",
-        artifactId = "device-manager",
+        artifactId = "devicemanager-device",
         version = "0.0.1",
     )
 
