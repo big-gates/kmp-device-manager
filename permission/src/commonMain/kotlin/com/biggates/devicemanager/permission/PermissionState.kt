@@ -1,5 +1,8 @@
 package com.biggates.devicemanager.permission
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+
 enum class AppPermission {
     /**
      * iOS/Android 공통: 포그라운드 위치
@@ -22,7 +25,7 @@ interface PermissionController{
     suspend fun launchPermissions(permissions: Array<AppPermission>): Map<AppPermission, Boolean>
     suspend fun shouldShowRationale(permission: AppPermission): Boolean
     suspend fun openAppSettings()
-    suspend fun recheckPermissions(permissions: Array<AppPermission>): Map<AppPermission, Boolean>
+    suspend fun checkPermissionsGranted(permissions: Array<AppPermission>): Map<AppPermission, Boolean>
 }
 
 sealed class PermissionState {
@@ -62,7 +65,16 @@ suspend fun PermissionController.requestWithAutoRetryAndSettings(
     // 여기까지 왔는데도 거부라면 대개 '다시는 묻지 않기' 상태
     // 설정으로 보내고, 돌아오면 다시 한 번 확인
     openAppSettings()
-    result = recheckPermissions(permissions)
+    result = checkPermissionsGranted(permissions)
     return isGrantedAll()
 }
+
+val LocalPermissionController = staticCompositionLocalOf<PermissionController> {
+    error("PermissionController is not provided. " +
+            "Wrap your composable with PermissionControllerProvider.")
+}
+
+@Composable
+fun rememberPermissionController(): PermissionController =
+    LocalPermissionController.current
 

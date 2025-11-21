@@ -86,7 +86,7 @@ class AndroidPermissionController(
         cont.invokeOnCancellation { pendingSettings = null }
     }
 
-    override suspend fun recheckPermissions(
+    override suspend fun checkPermissionsGranted(
         permissions: Array<AppPermission>
     ): Map<AppPermission, Boolean> = permissions.toCurrentState(context)
 

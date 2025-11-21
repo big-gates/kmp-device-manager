@@ -83,7 +83,7 @@ class IosPermissionController(
         )
     }
 
-    override suspend fun recheckPermissions(
+    override suspend fun checkPermissionsGranted(
         permissions: Array<AppPermission>
     ): Map<AppPermission, Boolean> {
         // 재확인은 "요청 없이 현재 상태를 조회"하는 의미로 구현
