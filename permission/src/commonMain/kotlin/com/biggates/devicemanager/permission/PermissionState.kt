@@ -22,10 +22,12 @@ enum class AppPermission {
 
 interface PermissionController{
     val context: PlatformContext
-    suspend fun launchPermissions(permissions: Array<AppPermission>): Map<AppPermission, Boolean>
+    suspend fun launchPermissions(permissions: List<AppPermission>): Map<AppPermission, Boolean>
+    suspend fun launchPermission(permission: AppPermission): Boolean
     suspend fun shouldShowRationale(permission: AppPermission): Boolean
     suspend fun openAppSettings()
-    suspend fun checkPermissionsGranted(permissions: Array<AppPermission>): Map<AppPermission, Boolean>
+    suspend fun checkPermissionsGranted(permissions: List<AppPermission>): Map<AppPermission, Boolean>
+    suspend fun checkPermissionGranted(permission: AppPermission): Boolean
 }
 
 sealed class PermissionState {
@@ -41,7 +43,7 @@ sealed class PermissionState {
  * - 여전히 거부이면서 '다시는 묻지 않기(영구 거부)'면, 설정 화면 열고 복귀 후 재확인
  */
 suspend fun PermissionController.requestWithAutoRetryAndSettings(
-    permissions: Array<AppPermission>
+    permissions: List<AppPermission>
 ): Boolean {
     var result = launchPermissions(permissions)
 
@@ -67,6 +69,33 @@ suspend fun PermissionController.requestWithAutoRetryAndSettings(
     openAppSettings()
     result = checkPermissionsGranted(permissions)
     return isGrantedAll()
+}
+
+/**
+ * 사용자가 아무것도 신경 쓰지 않아도 되도록:
+ * - 1차 요청
+ * - 거부되었고 '설명 필요' 상태면, 자동으로 한 번 더 재요청
+ * - 여전히 거부이면서 '다시는 묻지 않기(영구 거부)'면, 설정 화면 열고 복귀 후 재확인
+ */
+suspend fun PermissionController.requestWithAutoRetryAndSettings(
+    permission: AppPermission
+): Boolean {
+    var result = launchPermission(permission)
+
+    if (result) return true
+
+    // 설명 필요(라쇼날)인 항목 "한 번 더" 자동 재요청
+    val needsRationale = shouldShowRationale(permission)
+    if (needsRationale) {
+        result = launchPermission(permission)
+        if (result) return true
+    }
+
+    // 여기까지 왔는데도 거부라면 대개 '다시는 묻지 않기' 상태
+    // 설정으로 보내고, 돌아오면 다시 한 번 확인
+    openAppSettings()
+    result = checkPermissionGranted(permission)
+    return result
 }
 
 val LocalPermissionController = staticCompositionLocalOf<PermissionController> {

@@ -24,16 +24,36 @@ class AndroidPermissionController(
 ) : PermissionController {
 
     // 진행 중인 요청을 이어줄 콜백들 (동시 요청 보호)
-    private var pendingPermission: ((Map<AppPermission, Boolean>) -> Unit)? = null
+    private var pendingPermissions: ((Map<AppPermission, Boolean>) -> Unit)? = null
+    private var pendingPermission: ((Boolean) -> Unit)? = null
+
     private var pendingSettings: (() -> Unit)? = null
 
     override suspend fun launchPermissions(
-        permissions: Array<AppPermission>
+        permissions: List<AppPermission>
     ): Map<AppPermission, Boolean> {
         val androidStrings = permissions.toAndroid().toTypedArray()
 
         return if (androidStrings.isEmpty()) {
             permissions.toCurrentState(context)
+        } else {
+            suspendCancellableCoroutine { cont ->
+                check(pendingPermissions == null) { "Permission request already in progress" }
+                pendingPermissions = { result ->
+                    if (!cont.isCompleted) cont.resume(result)
+                    pendingPermissions = null
+                }
+                permissionLauncher.launch(androidStrings)
+                cont.invokeOnCancellation { pendingPermissions = null }
+            }
+        }
+    }
+
+    override suspend fun launchPermission(permission: AppPermission): Boolean {
+        val androidStrings = permission.toAndroid().toTypedArray()
+
+        return if (androidStrings.isEmpty()) {
+            permission.toCurrentState(context)
         } else {
             suspendCancellableCoroutine { cont ->
                 check(pendingPermission == null) { "Permission request already in progress" }
@@ -87,15 +107,18 @@ class AndroidPermissionController(
     }
 
     override suspend fun checkPermissionsGranted(
-        permissions: Array<AppPermission>
+        permissions: List<AppPermission>
     ): Map<AppPermission, Boolean> = permissions.toCurrentState(context)
 
+    override suspend fun checkPermissionGranted(permission: AppPermission): Boolean {
+        return permission.toCurrentState(context)
+    }
 
     // --- 런처 콜백에서 호출될 진입점 ---
     fun onPermissionsResult(result: Map<String, Boolean>) {
         val aggregated = result.toAppPermission()
-        pendingPermission?.invoke(aggregated)
-        pendingPermission = null
+        pendingPermissions?.invoke(aggregated)
+        pendingPermissions = null
     }
 
     fun onReturnedFromSettings() {

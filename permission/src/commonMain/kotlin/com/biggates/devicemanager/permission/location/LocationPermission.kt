@@ -11,7 +11,7 @@ suspend fun PermissionController.requestLocationWhenInUse(): PermissionState {
 
     val requestPermission = AppPermission.LocationWhenInUse
 
-    val granted = requestWithAutoRetryAndSettings(arrayOf(requestPermission))
+    val granted = requestWithAutoRetryAndSettings(listOf(requestPermission))
     if (granted) return PermissionState.Granted
 
     val canAskAgain = shouldShowRationale(AppPermission.LocationWhenInUse)

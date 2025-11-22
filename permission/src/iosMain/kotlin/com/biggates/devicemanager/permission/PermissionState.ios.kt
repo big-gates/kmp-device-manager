@@ -19,13 +19,14 @@ import platform.UserNotifications.UNAuthorizationStatusDenied
 import platform.UserNotifications.UNAuthorizationStatusEphemeral
 import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
+import kotlin.collections.set
 
 class IosPermissionController(
     override val context: PlatformContext,
 ) : PermissionController {
 
     override suspend fun launchPermissions(
-        permissions: Array<AppPermission>
+        permissions: List<AppPermission>
     ): Map<AppPermission, Boolean> {
         val out = mutableMapOf<AppPermission, Boolean>()
         for (permission in permissions) {
@@ -37,6 +38,14 @@ class IosPermissionController(
             out[permission] = granted
         }
         return out
+    }
+
+    override suspend fun launchPermission(permission: AppPermission): Boolean {
+        return when (permission) {
+            AppPermission.LocationWhenInUse -> { requestLocationWhenInUse() == PermissionState.Granted }
+            AppPermission.LocationAlways -> { requestLocationAlways() == PermissionState.Granted }
+            AppPermission.Notifications -> { requestNotifications() == PermissionState.Granted }
+        }
     }
 
     override suspend fun shouldShowRationale(permission: AppPermission): Boolean {
@@ -84,7 +93,7 @@ class IosPermissionController(
     }
 
     override suspend fun checkPermissionsGranted(
-        permissions: Array<AppPermission>
+        permissions: List<AppPermission>
     ): Map<AppPermission, Boolean> {
         // 재확인은 "요청 없이 현재 상태를 조회"하는 의미로 구현
         val out = mutableMapOf<AppPermission, Boolean>()
@@ -97,6 +106,14 @@ class IosPermissionController(
             out[p] = granted
         }
         return out
+    }
+
+    override suspend fun checkPermissionGranted(permission: AppPermission): Boolean {
+        return when (permission) {
+            AppPermission.LocationWhenInUse -> context.checkLocationWhenInUseGranted()
+            AppPermission.LocationAlways -> context.checkLocationAlwaysGranted()
+            AppPermission.Notifications -> context.checkNotificationsGranted()
+        }
     }
 }
 

@@ -29,7 +29,7 @@ actual suspend fun PermissionController.requestLocationAlways(): PermissionState
     if (context.checkLocationAlwaysGranted()) return PermissionState.Granted
 
     // 백그라운드 요청 플로우
-    val backgroundGranted = requestWithAutoRetryAndSettings(arrayOf(AppPermission.LocationAlways))
+    val backgroundGranted = requestWithAutoRetryAndSettings(listOf(AppPermission.LocationAlways))
     if (backgroundGranted || context.checkLocationAlwaysGranted()) {
         return PermissionState.Granted
     }

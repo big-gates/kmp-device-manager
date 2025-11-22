@@ -11,7 +11,7 @@ suspend fun PermissionController.requestNotifications(): PermissionState {
 
     val requestPermission = AppPermission.Notifications
 
-    val granted = requestWithAutoRetryAndSettings(arrayOf(requestPermission))
+    val granted = requestWithAutoRetryAndSettings(requestPermission)
     if (granted) return PermissionState.Granted
 
     val canAskAgain = shouldShowRationale(requestPermission)

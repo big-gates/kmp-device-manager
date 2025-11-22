@@ -6,7 +6,7 @@ import com.biggates.devicemanager.permission.location.checkLocationAlwaysGranted
 import com.biggates.devicemanager.permission.location.checkLocationWhenInUseGranted
 import com.biggates.devicemanager.permission.notification.checkNotificationsGranted
 
-fun Array<AppPermission>.toAndroid(): List<String> {
+fun List<AppPermission>.toAndroid(): List<String> {
     val out = mutableSetOf<String>()
     forEach { p ->
         when (p) {
@@ -26,6 +26,29 @@ fun Array<AppPermission>.toAndroid(): List<String> {
                 }
                 // 32 이하는 런타임 퍼미션 없음
             }
+        }
+    }
+    return out.toList()
+}
+
+fun AppPermission.toAndroid(): List<String> {
+    val out = mutableSetOf<String>()
+    when (this) {
+        AppPermission.LocationWhenInUse -> {
+            out += Manifest.permission.ACCESS_FINE_LOCATION
+            out += Manifest.permission.ACCESS_COARSE_LOCATION
+        }
+        AppPermission.LocationAlways -> {
+            if (Build.VERSION.SDK_INT >= 29) {
+                out += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            }
+            // 28 이하는 런타임 퍼미션 없음
+        }
+        AppPermission.Notifications -> {
+            if (Build.VERSION.SDK_INT >= 33) {
+                out += Manifest.permission.POST_NOTIFICATIONS
+            }
+            // 32 이하는 런타임 퍼미션 없음
         }
     }
     return out.toList()
@@ -66,7 +89,7 @@ fun Map<String, Boolean>.notificationsFromResult(): Boolean {
     }
 }
 
-suspend fun Array<AppPermission>.toCurrentState(context: PlatformContext): Map<AppPermission, Boolean> {
+suspend fun List<AppPermission>.toCurrentState(context: PlatformContext): Map<AppPermission, Boolean> {
     val map = mutableMapOf<AppPermission, Boolean>()
     forEach { permission ->
         when (permission) {
@@ -76,4 +99,12 @@ suspend fun Array<AppPermission>.toCurrentState(context: PlatformContext): Map<A
         }
     }
     return map
+}
+
+suspend fun AppPermission.toCurrentState(context: PlatformContext): Boolean {
+    return when (this) {
+        AppPermission.LocationWhenInUse -> context.checkLocationWhenInUseGranted()
+        AppPermission.LocationAlways -> context.checkLocationAlwaysGranted()
+        AppPermission.Notifications -> context.checkNotificationsGranted()
+    }
 }
