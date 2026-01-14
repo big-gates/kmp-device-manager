@@ -4,7 +4,8 @@ import android.annotation.SuppressLint
 import android.os.Looper
 import com.biggates.devicemanager.device.Location
 import com.biggates.devicemanager.device.PlatformContext
-import com.biggates.devicemanager.permission.location.checkLocationWhenInUseGranted
+import com.biggates.devicemanager.permission.Permission
+import com.biggates.devicemanager.permission.isGranted
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -35,10 +36,11 @@ class AndroidLocationMonitor(
     private var liveTrackingEnabled: Boolean = false
 
     override suspend fun start() {
-        fusedClient = LocationServices.getFusedLocationProviderClient(context)
-        if (context.checkLocationWhenInUseGranted()) {
-            startLocationUpdatesInternal()
+        check(Permission.Location.isGranted()) {
+            "Location permission (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is required before calling start()."
         }
+        fusedClient = LocationServices.getFusedLocationProviderClient(context)
+        startLocationUpdatesInternal()
     }
 
     override fun stop() {
@@ -48,13 +50,13 @@ class AndroidLocationMonitor(
     }
 
     override suspend fun enableLiveTracking(enable: Boolean) {
-        liveTrackingEnabled = enable
-        if (context.checkLocationWhenInUseGranted()) {
-            stop()
-            // 재시작
-            fusedClient = LocationServices.getFusedLocationProviderClient(context)
-            startLocationUpdatesInternal()
+        check(Permission.Location.isGranted()) {
+            "Location permission (ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION) is required before calling enableLiveTracking()."
         }
+        liveTrackingEnabled = enable
+        stop()
+        fusedClient = LocationServices.getFusedLocationProviderClient(context)
+        startLocationUpdatesInternal()
     }
 
     @SuppressLint("MissingPermission")

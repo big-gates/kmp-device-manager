@@ -1,6 +1,8 @@
 package com.biggates.devicemanager.device.monitor.location
 
 import com.biggates.devicemanager.device.Location
+import com.biggates.devicemanager.permission.Permission
+import com.biggates.devicemanager.permission.isGranted
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.CoroutineScope
@@ -15,8 +17,6 @@ import platform.CoreLocation.CLActivityTypeOther
 import platform.CoreLocation.CLLocation
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.CLLocationManagerDelegateProtocol
-import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
-import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.CoreLocation.kCLLocationAccuracyHundredMeters
 import platform.darwin.NSObject
 
@@ -32,6 +32,10 @@ class IosLocationMonitor : LocationMonitor {
 
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun start() {
+        check(Permission.Location.isGranted()) {
+            "Location permission (NSLocationWhenInUseUsageDescription) is required before calling start()."
+        }
+
         val manager = cLLocationManager ?: CLLocationManager().also { cLLocationManager = it }
 
         val locationDelegate = LocationDelegate(
@@ -61,11 +65,7 @@ class IosLocationMonitor : LocationMonitor {
         manager.pausesLocationUpdatesAutomatically = false
         manager.activityType = CLActivityTypeOther
 
-        // 권한 체크 (iOS 14+는 인스턴스 프로퍼티 권장)
-        val status = CLLocationManager.authorizationStatus()
-        if (status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse) {
-            startInternal()
-        }
+        startInternal()
     }
 
     override fun stop() {
@@ -78,6 +78,9 @@ class IosLocationMonitor : LocationMonitor {
     }
 
     override suspend fun enableLiveTracking(enable: Boolean) {
+        check(Permission.Location.isGranted()) {
+            "Location permission (NSLocationWhenInUseUsageDescription) is required before calling enableLiveTracking()."
+        }
         liveTrackingEnabled = enable
         cLLocationManager?.let {
             it.stopUpdatingLocation()
