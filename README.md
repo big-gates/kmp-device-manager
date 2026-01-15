@@ -4,8 +4,12 @@ Kotlin Multiplatform 라이브러리로 Android와 iOS에서 **권한 관리**�
 
 직관적이고 간결한 API를 제공합니다.
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.biggates/devicemanager-permission)](https://central.sonatype.com/artifact/com.biggates/devicemanager-permission)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+| Module | Version |
+|--------|---------|
+| devicemanager-permission | 0.0.1 |
+| devicemanager-device | 0.0.1 |
 
 ## Features
 
@@ -24,10 +28,10 @@ Kotlin Multiplatform 라이브러리로 Android와 iOS에서 **권한 관리**�
 // build.gradle.kts
 dependencies {
     // Permission 모듈만 사용
-    implementation("com.biggates:devicemanager-permission:0.0.1")
+    implementation("io.github.big-gates:devicemanager-permission:0.0.1")
 
     // Device 모듈 사용 (Permission 모듈 포함)
-    implementation("com.biggates:devicemanager-device:0.0.1")
+    implementation("io.github.big-gates:devicemanager-device:0.0.1")
 }
 ```
 
@@ -39,8 +43,8 @@ dependencies {
 devicemanager = "0.0.1"
 
 [libraries]
-devicemanager-permission = { module = "com.biggates:devicemanager-permission", version.ref = "devicemanager" }
-devicemanager-device = { module = "com.biggates:devicemanager-device", version.ref = "devicemanager" }
+devicemanager-permission = { module = "io.github.big-gates:devicemanager-permission", version.ref = "devicemanager" }
+devicemanager-device = { module = "io.github.big-gates:devicemanager-device", version.ref = "devicemanager" }
 ```
 
 ---
