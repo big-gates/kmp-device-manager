@@ -75,32 +75,42 @@ mavenPublishing {
     )
 
     pom {
-        name = "Device Info Manager (Kotlin Multiplatform)"
-        description = "Device Info Manager"
-        inceptionYear = "2025"
-        url = "https://github.com/big-gates/devicemanager-kmp"
+        name.set("DeviceManager Device")
+        description.set(
+            "A Kotlin Multiplatform library for accessing device information and monitoring on Android and iOS. " +
+            "Includes location tracking, device info, and integrates with devicemanager-permission module."
+        )
+        inceptionYear.set("2025")
+        url.set("https://github.com/big-gates/kmp-device-manager")
 
         licenses {
             license {
-                name = "The Apache License, Version 2.0"
-                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
             }
         }
 
         developers {
             developer {
-                id = "big-gates"
-                name = "Big Gates"
-                email = "biggatescorp@gamil.com"
-                url = "https://github.com/big-gates"
+                id.set("big-gates")
+                name.set("Big Gates")
+                email.set("biggatescorp@gmail.com")
+                url.set("https://github.com/big-gates")
+                organization.set("Big Gates")
+                organizationUrl.set("https://github.com/big-gates")
             }
         }
 
         scm {
-            url = "https://github.com/big-gates/devicemanager-kmp"
-            connection = "scm:git:https://github.com/big-gates/devicemanager-kmp.git"
-            developerConnection = "scm:git:ssh://git@github.com/big-gates/devicemanager-kmp.git"
+            url.set("https://github.com/big-gates/kmp-device-manager")
+            connection.set("scm:git:git://github.com/big-gates/kmp-device-manager.git")
+            developerConnection.set("scm:git:ssh://git@github.com/big-gates/kmp-device-manager.git")
+        }
+
+        issueManagement {
+            system.set("GitHub Issues")
+            url.set("https://github.com/big-gates/kmp-device-manager/issues")
         }
     }
 }
